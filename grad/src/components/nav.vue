@@ -14,8 +14,8 @@
       </div>
 			<div class="headUser" v-if="ifLogin">
 				<div class="userAvatar">
-					<img v-if="type == 1" src="../assets/学生.png" >
-					<img v-if="type == 2" src="../assets/teacher.png">
+					<img v-if="type === 1" src="../assets/学生.png" >
+					<img v-if="type === 2 || type === 3" src="../assets/teacher.png">
 				</div>
 				<div 
 					class="userInfo"
@@ -27,7 +27,7 @@
 					</p>
 					<p class="info Age">
 						<span>{{name}}</span>
-						<span>{{type == 1 ? '学生' : '教师'}}</span>
+						<span>{{type == 1 ? '学生' : type == 2 ? '教师' : ''}}</span>
 					</p>
 				</div>
 				<div 
@@ -99,6 +99,7 @@
 import { mapState } from 'vuex'
 export default {
 	name: 'Nav',
+	inject: ['reload'],
 	data () {
 		return {
 			isActive: 0,
@@ -125,13 +126,15 @@ export default {
 			case '/myClass':
 				this.isActive = 2
 				break	
+			case '/userAccount':
+				this.isActive = 2
 		}
 	},
 	mounted () {
 		this.$axios.getAuth()
 			.then(({ data }) => {
 				if (data.code === 200) {
-					this.pushBar()
+					this.pushBar(data.data)
 					this.changeLoginStatus(true)
 					this.getUserMessage()
 				}
@@ -146,12 +149,21 @@ export default {
 		},
 
 		// 改变导航栏
-		pushBar () {
-			if (this.barList.length < 3) {
-				this.barList.push({
-					name: '我的课程',
-					target: '/myClass'
-				})
+		pushBar (userType) {
+			if (userType === 1 || userType === 2) {
+				if (this.barList.length < 3) {
+					this.barList.push({
+						name: '我的课程',
+						target: '/myClass'
+					})
+				}
+			} else if (userType === 3) {
+				if (this.barList.length < 3) {
+					this.barList.push({
+						name: '账号管理',
+						target: '/userAccount'
+					})
+				}				
 			}
 		},
 
@@ -188,6 +200,7 @@ export default {
 							this.visible = false
 							this.getUserMessage()
 							this.pushBar()
+							this.reload()
 						}).catch((mes) => {
 							this.$message.error(mes)
 						})

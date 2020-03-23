@@ -22,32 +22,27 @@
         @click="handleClick"
       >
         <a-menu-item key="1">
-          <router-link :to="{name: 'classProcess'}" >
+          <router-link :to="{ name: 'classProcess', query: { classId: this.$route.query.classId }}" >
             教学进度
           </router-link>
         </a-menu-item>
         <a-menu-item key="2">
-          <router-link :to="{name: 'classNotice'}" >
+          <router-link :to="{ name: 'classNotice', query: { classId: this.$route.query.classId } }" >
             教学通知
           </router-link>
         </a-menu-item>
         <a-menu-item key="3">
-          <router-link :to="{name: 'classWork'}" >
+          <router-link :to="{name: 'classWork', query: { classId: this.$route.query.classId }}" >
             作业
           </router-link>
         </a-menu-item>
-        <a-menu-item key="4">
-          <router-link :to="{name: 'classVideo'}" >
-            教学视频
-          </router-link>
-        </a-menu-item>
         <a-menu-item key="5">
-          <router-link :to="{name: 'classDiscuss'}" >
+          <router-link :to="{name: 'classDiscuss', query: { classId: this.$route.query.classId }}" >
             讨论区
           </router-link>
         </a-menu-item>
         <a-menu-item key="6">
-          <router-link :to="{name: 'classShare'}" >
+          <router-link :to="{name: 'classShare', query: { classId: this.$route.query.classId }}" >
             资源共享
           </router-link>
         </a-menu-item>
@@ -100,6 +95,7 @@ export default {
   .detailContainer {
     .classTitle {
       width: 100vw;
+      min-width: 1200px;
       height: 10vh;
       min-height: 75px;
       position: relative;

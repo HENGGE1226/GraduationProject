@@ -122,7 +122,6 @@ export default {
 	mounted () {
 		this.form.validateFields((err, values) => {
 			if (!err) {
-				console.log('Received values of form: ', values)
 				values.page = 1
 				values.pageSize = 8
 				this.$axios.queryClass(values)
@@ -143,7 +142,6 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-					console.log('Received values of form: ', values)
 					values.page = 1
 					values.pageSize = 8
 					this.$axios.queryClass(values)

@@ -1,48 +1,103 @@
 <template>
   <div class="noticeContainer">
-    <div class="noticeItem" v-for="item in noticeItem" :key="item.id">
+    <div class="noticeItem" v-for="item in noticeList" :key="item.id">
       <div class="itemIcon"></div>
       <div class="itemContent">
         <div class="title">
-          {{item.title}}
+          {{item.noticeTitle}}
         </div>
+        <span class="time">{{item.time}}</span>
         <div class="date">{{item.date}}</div>
-        <div class="content" :ref="item.ref">
-          {{item.content}}
+        <div class="content" id="con">
+          {{item.noticeContent}}
         </div>  
       </div>
-      <div class="itemName">{{item.name}}</div>
-      <router-link to="noticeDetail?id=123">
-        <a class="showAll">查看全部</a>
-      </router-link>
+      <div class="itemName">{{teacherName}}</div>
+      <a class="showAll" @click="showAll(item.id)">查看全部</a>
+      <a
+        class="edit"
+        v-if="userType === '2'"
+        @click="handleGo(item.id)"
+      >
+        编辑
+      </a>
+      <a-popconfirm
+        title="确定删除此通知吗?"
+        @confirm="deleteNotice(item.id)"
+        okText="确认"
+        cancelText="取消"
+      >
+        <a
+          class="delete"
+          v-if="userType === '2'"
+        >
+          删除
+        </a>
+      </a-popconfirm>
     </div>
+    <router-link :to="{ name: 'noticeDetail', query: { classId: this.$route.query.classId }}">
+      <a-button 
+        type="primary" 
+        class="noticeEdit"
+        v-if="this.userType === '2'"
+      >
+        发放通知
+      </a-button>
+    </router-link>
   </div>
 </template>
 
 <script>
+import moment from 'moment'
 export default {
   name: 'classNotice',
   data () {
     return {
-      noticeItem: [
-        {
-          id: 1,
-          title: '关于期末考试的通知',
-          date: '2020年9月1日',
-          name: '叶光恒',
-          content: '期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。期末考试定于2020年9月20日进行，请各位同学好好努力。'
-        }
-      ]
+      noticeList: [],
+      userType: window.sessionStorage.getItem('userType'),
+      classId: this.$route.query.classId,
+      teacherName: ''
     }
   },
   mounted () {
-    console.log('notice')
-    const textWrap = document.defaultView.getComputedStyle(this.$refs.con)
-    const maxHeight = parseInt(textWrap.maxHeight)
-    const height = parseInt(textWrap.height)
-    console.log(height, maxHeight, this.$refs.con)
-    if (height >= maxHeight) {
-      this.showAll = true
+    this.$axios.getClassDetail({ id: this.classId })
+      .then(({ data }) => {
+        if (data.code === 200) {
+          this.teacherName = data.data.teacherName
+        }
+      })
+    this.getNoticeList()
+  },
+  methods: {
+    handleGo (id) {
+			this.$router.push({path: 'noticeDetail', query: { classId: this.classId, noticeId: id, type: 2 }})
+    },
+    showAll (id) {
+			this.$router.push({path: 'noticeDetail', query: { classId: this.classId, noticeId: id, type: 1 }})
+    },
+    getNoticeList () {
+      this.$axios.getNoticeList({ classId: this.classId })
+        .then(({data}) => {
+          if (data.code === 200) {
+            this.noticeList = data.res
+            for (let i of this.noticeList) {
+              i.time = moment(i.time).format('YYYY-MM-DD')
+            }
+          } else {
+            this.$message.error('获取数据失败')
+          }
+        })
+    },
+    deleteNotice (id) {
+      this.$axios.deleteNotice({ noticeId: id })
+        .then(({ data }) => {
+          if (data.code === 200) {
+            this.$message.success('删除成功')
+            this.getNoticeList()
+          } else {
+            this.$message.error('删除失败')
+          }
+        })
     }
   }
 }
@@ -50,10 +105,12 @@ export default {
 
 <style scoped lang="less">
   .noticeContainer {
+    min-width: 1200px;
     padding-bottom: 30px;
+    position: relative;
     .noticeItem {
       width: 60vw;
-      min-width: 650px;
+      min-width: 940px;
       height: auto;
       min-height: 130px;
       position: relative;
@@ -81,6 +138,11 @@ export default {
           font-size: 20px;
           font-weight: 500;
           display: inline-block;
+        }
+        .time {
+          margin-left: 50px;
+          color: #ccc;
+          font-size: 14px;
         }
         .date {
           font-size: 14px;
@@ -112,6 +174,26 @@ export default {
         bottom: 10px;
         left: 100px;
       }
+      .edit {
+        position: absolute;
+        display: block;
+        font-size: 14px;
+        right: 25px;
+        top: 30px;
+      }
+      .delete {
+        position: absolute;
+        display: block;
+        font-size: 14px;
+        color: red;
+        right: 25px;
+        top: 80px;
+      }
+    }
+    .noticeEdit {
+      position: absolute;
+      right: 130px;
+      top: 10px;
     }
   }
 </style>

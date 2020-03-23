@@ -124,7 +124,7 @@ export default {
       formLayout: 'horizontal',
 			form: this.$form.createForm(this, { name: 'coordinated' }),
 			classItem: [],
-			totle: ''
+			total: 0
     }
 	},
 	mounted () {
@@ -141,7 +141,7 @@ export default {
 					this.$axios.getUserClass(values)
 						.then(({ data }) => {
 							this.classItem = data.res
-							this.total = data.total
+							this.total = Number(data.total)
 							if (data.code !== 200) {
 								this.$message.error(data.mes)
 							}

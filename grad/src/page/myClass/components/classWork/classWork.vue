@@ -1,67 +1,153 @@
 <template>
   <div class="workContainer">
-    <div class="noticeItem">
+    <div class="noticeItem" v-for="item in workList" :key="item.id">
       <div class="itemIcon"></div>
       <div class="itemContent">
         <div class="title">
-          第三章第一节课堂作业
-          <aTooltip placement="top" title="当前作业提交状态">
-            <aTag class="tag" color="red">未提交</aTag>
-          </aTooltip>
+          {{item.workTitle}}
+          <a-tooltip placement="top" title="当前作业提交状态">
+            <aTag class="tag" color="green" v-if="item.status === 1">已提交</aTag>
+            <aTag class="tag" color="red" v-if="item.status === 2">未提交</aTag>
+          </a-tooltip>
         </div>
-        <div class="date">2020年9月1日</div>
+        <div class="date">{{item.time}}</div>
+        <a-tooltip placement="top" title="当前作业的分数">
+          <div class="score">{{item.point}}</div>
+        </a-tooltip>
         <div class="content">
-          <p class="lastSubTime">课程：微积分</p>
-          <p class="classId lastSubTime">课程ID：123456</p>
-          <p class="endTime">截止时间： 2020-10-01</p>
+          <p class="lastSubTime">课程：{{classDetail.name}}</p>
+          <p class="classId lastSubTime">课程ID：{{classDetail.classId}}</p>
+          <p class="lastSubTime" v-if="item.lastSubmitTime">上次提交时间：{{item.lastSubmitTime}}</p>
+          <p class="endTime">截止时间： {{item.endTime}}</p>
         </div>
       </div>
-      <router-link to="workDetail?id=123">
-        <aButton class="submitBtn" type="primary">
-          完成
-        </aButton>
-      </router-link>
-      <div class="itemName">叶光恒</div>
+      <div class="deleteBtn" v-if="userType === '2'">
+        <a-popconfirm
+          title="确定删除此作业吗?"
+          @confirm="deleteWork(item.id)"
+          okText="确认"
+          cancelText="取消"
+        >
+          <a style="color: red;">删除</a>
+        </a-popconfirm>
+      </div>
+      <aButton 
+        class="submitBtn" 
+        type="primary" 
+        v-if="item.status === 2" 
+        :disabled="!(now < item.endTime)"
+        @click="changeRoute(item.id)"
+      >
+        完成
+      </aButton>
+      <aButton 
+        class="submitBtn" 
+        type="primary" 
+        v-if="item.status === 1" 
+        :disabled="!(now < item.endTime)"
+        @click="changeRoute(item.id)"
+      >
+        修改
+      </aButton>
+      <aButton 
+        class="submitBtn" 
+        type="primary" 
+        v-if="userType === '2'" 
+        @click="routeToUpdate(item.id)"
+      >
+        编辑作业
+      </aButton>
+      <div class="itemName">{{classDetail.teacherName}}</div>
     </div>
-    <div class="noticeItem">
-      <div class="itemIcon"></div>
-      <div class="itemContent">
-        <div class="title">
-          第二章第一节课堂作业
-          <aTooltip placement="top" title="当前作业提交状态">
-            <aTag class="tag" color="green">已提交</aTag>
-          </aTooltip>
-        </div>
-        <div class="date">2020年9月1日</div>
-        <aTooltip placement="top" title="当前作业的分数">
-          <div class="score">80</div>
-        </aTooltip>
-        <div class="content">
-          <p class="className lastSubTime">课程：微积分</p>
-          <p class="classId lastSubTime">课程ID：123456</p>
-          <p class="lastSubTime">上次提交时间：2020-09-06</p>
-          <p class="endTime">截止时间： 2020-10-01</p>
-        </div>
-      </div>
-      <router-link to="workDetail?id=123">
-        <aButton class="submitBtn" type="danger">
-          修改
-        </aButton>
+    <div v-if="userType === '2'">
+      <router-link :to="{ name: 'workDetail', query: { classId: this.$route.query.classId, type: 2 }}">
+        <a-button type="primary" class="deliverBtn">
+          布置作业
+        </a-button>
       </router-link>
-      <div class="itemName">叶光恒</div>
+      <router-link :to="{ name: 'totalDetail', query: { classId: this.$route.query.classId }}">
+        <a-button class="deliverBtn" style="margin-top: 50px;">
+          总体情况
+        </a-button>
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
-import { Tag, Pagination, Button, Tooltip } from 'ant-design-vue'
+import moment from 'moment'
 export default {
   name: 'classWork',
-  components: {
-    aPagination: Pagination,
-    aTag: Tag,
-    aButton: Button,
-    aTooltip: Tooltip
+  data () {
+    return {
+      classId: this.$route.query.classId,
+      userType: window.sessionStorage.getItem('userType'),
+      userId: window.sessionStorage.getItem('userId'),
+      classDetail: {},
+      workList: [],
+      now: moment(new Date()).format('YYYY-MM-DD')
+    }
+  },
+  mounted () {
+    this.getList()
+    this.$axios.getClassDetail({ id: this.classId })
+      .then(({ data }) => {
+        if (data.code === 200) {
+          this.classDetail = data.data
+        }
+    })
+  },
+  methods: {
+    getList () {
+      this.$axios.getWorkList({ classId: this.classId })
+        .then(async ({ data }) => {
+          if (data.code === 200) {
+            const res = data.res
+            if (this.userType === '1') {
+              for (let i of res) {
+                i.time = moment(i.time).format('YYYY-MM-DD')
+                i.endTime = moment(i.endTime).format('YYYY-MM-DD')
+                const data = await this.$axios.getWorkStatus({ workId: i.id, studentId: this.userId })
+                const _data = data.data
+                const mes = _data.res
+                if (_data.code === 200 && mes.length > 0) {
+                  i.point = mes[0].point || '未批改'
+                  i.lastSubmitTime = moment(mes[0].lastSubmitTime).format('YYYY-MM-DD')
+                  i.status = 1 // 1表示已提交 2表示未提交
+                } else {
+                  i.status = 2
+                }
+              }
+            } else {
+              for (let i of res) {
+                i.time = moment(i.time).format('YYYY-MM-DD')
+                i.endTime = moment(i.endTime).format('YYYY-MM-DD')
+              }
+            }
+            this.workList = res
+          } else {
+            this.$message.error('获取数据失败')
+          }
+        })
+    },
+    changeRoute (id) {
+      console.log(id)
+      this.$router.push({ path: 'workDetail', query: { classId: this.classId, workId: id, type: 1 } })
+    },
+    routeToUpdate (id) {
+      this.$router.push({ path: 'workDetail', query: { classId: this.classId, workId: id, type: 2 } })
+    },
+    deleteWork (id) {
+      this.$axios.deleteWork({ id })
+        .then(({ data }) => {
+          if (data.code === 200) {
+            this.$message.success('删除成功')
+            this.getList()
+          } else {
+            this.$message.error('删除失败')
+          }
+        })
+    }
   }
 }
 </script>
@@ -130,6 +216,11 @@ export default {
           }
         }
       }
+      .deleteBtn {
+        position: absolute;
+        right: 50px;
+        top: 30px;
+      }
       .submitBtn { 
         display: inline-block;
       }
@@ -139,6 +230,11 @@ export default {
         left: 30px;
         font-weight: 500;
       }
+    }
+    .deliverBtn {
+      position: absolute;
+      right: 150px;;
+      top: 30px;
     }
   }
 </style>

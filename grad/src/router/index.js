@@ -6,7 +6,7 @@ import allClass from '../page/allClass/allClass.vue'
 import classIntro from '../page/allClass/classIntro.vue'
 
 import axios from '../common/axios'
-import menu from './menu'
+import { menu, userMenu } from './menu'
 
 Vue.use(Router)
 
@@ -47,7 +47,13 @@ router.beforeEach((to, from, next) => {
       .then(({ data }) => {
         if (data.code === 200) {
           if (!store.state.ifaddRoute) {
-            router.addRoutes(menu)
+            if (data.data === 1 || data.data === 2) {
+              console.log('add')
+              router.addRoutes(menu)
+            } else if (data.data === 3) {
+              console.log('add')
+              router.addRoutes(userMenu)
+            }
             store.dispatch('ChangeRoute', true)
           }    
           next()

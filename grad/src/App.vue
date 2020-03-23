@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <Nav class="nav" v-if="$route.meta.ifNav"></Nav>
-    <router-view/>
+    <Nav class="nav" v-if="$route.meta.ifNav && isReload"></Nav>
+    <router-view v-if="isReload" />
   </div>
 </template>
 
@@ -9,6 +9,24 @@
 import Nav from '@/components/nav.vue'
 export default {
   name: 'App',
+  provide () {
+    return {
+      reload: this.reload
+    }
+  },
+  data () {
+    return {
+      isReload: true
+    }
+  },
+  methods: {
+    reload () {
+      this.isReload = false
+      this.$nextTick(() => {
+        this.isReload = true
+      })
+    }
+  },
   components: { Nav }
 }
 </script>

@@ -8,14 +8,17 @@ import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 import 'ant-design-vue/dist/antd.css'
 import axios from './common/axios'
-import { message, Form, Button, Input, Pagination, Select, Card, Row, Col, Upload, InputNumber, Modal, Icon, Tag, Timeline, Tooltip, Menu } from 'ant-design-vue'
+import { message, Form, Table, Divider, DatePicker, Popconfirm, Button, Input, Pagination, Select, Card, Row, Col, Upload, InputNumber, Modal, Icon, Tag, Timeline, Tooltip, Menu } from 'ant-design-vue'
 
 const FormItem = Form.Item
-const components = [Form, FormItem, Button, Input, Input.TextArea, Pagination, Select, Select.Option, Card, Row, Col, Upload, InputNumber, Modal, Icon, Tag, Timeline, Timeline.Item, Tooltip, Menu, Menu.Item]
+const components = [Form, FormItem, Divider, DatePicker, Table, Popconfirm, Button, Input, Input.TextArea, Pagination, Select, Select.Option, Card, Row, Col, Upload, InputNumber, Modal, Icon, Tag, Timeline, Timeline.Item, Tooltip, Menu, Menu.Item]
 components.forEach(component => {
   Vue.component(component.name, component)
 })
 
+message.config({
+  duration: 1
+})
 Vue.config.productionTip = false
 Vue.prototype.$message = message
 Vue.prototype.$form = Form
