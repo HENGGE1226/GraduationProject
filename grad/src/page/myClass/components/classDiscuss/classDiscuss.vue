@@ -116,7 +116,7 @@ export default {
           if (this.fileList.length > 0) {
             for (let i of this.fileList) {
               if (i.response) {
-                const url = `http://q6wwr49lo.bkt.clouddn.com/${i.response.key}`
+                const url = `http://q8o10ycrm.bkt.clouddn.com/${i.response.key}`
                 values.imgUrl.push(url)
               }
             }
@@ -162,7 +162,6 @@ export default {
             this.$message.error('删除失败')
           }
         })
-
     }
   }
 }

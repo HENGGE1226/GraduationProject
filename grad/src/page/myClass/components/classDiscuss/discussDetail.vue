@@ -123,7 +123,6 @@ export default {
             this.$message.error('删除失败')
           }
         })
-
     }
   },
   components: {

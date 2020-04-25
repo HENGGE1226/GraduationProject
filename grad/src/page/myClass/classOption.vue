@@ -51,7 +51,7 @@
           </aSelectOption>
         </aSelect>
       </a-form-item>
-      <a-form-item label="课堂限制人数">
+      <!-- <a-form-item label="课堂限制人数">
         <a-input-number 
           v-decorator="[
             'limiteNum',
@@ -59,7 +59,7 @@
           ]" 
           :min="1"  
         />
-      </a-form-item>
+      </a-form-item> -->
       <a-form-item label="课程封面" extra="请上传图片">
         <a-upload
           action="http://up-z2.qiniu.com"
@@ -128,7 +128,7 @@ export default {
     this.form = this.$form.createForm(this, { name: 'validate_other' })
   },
   mounted () {
-    axios.getUploadToken()
+    this.$axios.getUploadToken()
       .then(({ data }) => {
         if (data.code === 200) {
           this.myToken.token = data.uploadToken
@@ -156,7 +156,7 @@ export default {
         if (!err) {
           if (this.fileList.length > 0) {
             if (this.fileList[0].response) {
-              const url = `http://q6wwr49lo.bkt.clouddn.com/${this.fileList[0].response.key}`
+              const url = `http://q8o10ycrm.bkt.clouddn.com/${this.fileList[0].response.key}`
               values.imgUrl = url
             }
           }

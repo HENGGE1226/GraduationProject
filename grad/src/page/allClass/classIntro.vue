@@ -9,7 +9,7 @@
         <p><span>开课老师:</span> {{classDetail.teacherName}}</p>
         <p><span>开课时间:</span> {{classDetail.year}}{{classDetail.season === 'spring' ? '春季学期' : '秋季学期'}}</p>
         <p><span>开课状态:</span> {{classDetail.classStatus === 'open' ? '开课中' : '已结课'}}</p>
-        <p><span>当前课程人数:</span> {{classDetail.studentNum}}/{{classDetail.limted}}</p>
+        <!-- <p><span>当前课程人数:</span> {{classDetail.studentNum}}/{{classDetail.limted}}</p> -->
       </div>
       <a-button type="primary" class="choseClass" v-if="type === 1 && auth === 1" @click="chooseClass()">
         选课

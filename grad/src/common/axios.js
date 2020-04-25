@@ -94,6 +94,21 @@ export default {
     return instance.post('/api/createClass', values)
   },
 
+  // 删除课程
+  deleteClass (values) {
+    return instance.post('/api/deleteClass', values)
+  },
+
+  // 关闭课程
+  offClass (values) {
+    return instance.post('/api/offClass', values)
+  },
+
+  // 开启课程
+  openClass (values) {
+    return instance.post('/api/openClass', values)
+  },
+
   // 搜索所有课程
   queryClass (values) {
     return instance.post('/api/queryClass', values)
@@ -112,6 +127,11 @@ export default {
   // 选择课程
   chooseClass (id) {
     return instance.post('/api/chooseClass', id)
+  },
+
+  // 退出课程
+  quitClass (values) {
+    return instance.post('/api/quitClass', values)
   },
 
   // 获取个人所选课程
@@ -232,5 +252,20 @@ export default {
   // 删除评论
   deleteReply (values) {
     return instance.post('/api/deleteReply', values)  
+  },
+
+  // 上传资源
+  uploadResource (values) {
+    return instance.post('/api/uploadResource', values)  
+  },
+
+  // 获取资源列表
+  getResourceList (values) {
+    return instance.post('/api/getResourceList', values)  
+  },
+
+  // 删除资源
+  deleteResource (values) {
+    return instance.post('/api/deleteResource', values)  
   }
 }

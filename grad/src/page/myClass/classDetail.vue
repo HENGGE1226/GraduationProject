@@ -47,6 +47,26 @@
           </router-link>
         </a-menu-item>
       </aMenu>
+      <a-popconfirm
+        title="确定关闭此课程吗?"
+        @confirm="offClass()"
+        okText="确认"
+        cancelText="取消"
+      >
+        <aButton class="optionButton" v-if="classDetail.classStatus === 'open'">
+          关闭课程
+        </aButton>
+      </a-popconfirm>
+      <a-popconfirm
+        title="确定关闭此课程吗?"
+        @confirm="openClass()"
+        okText="确认"
+        cancelText="取消"
+      >
+        <aButton class="optionButton" v-if="classDetail.classStatus === 'off'">
+          开启课程
+        </aButton>
+      </a-popconfirm>
       <div class="content">
         <router-view></router-view>
       </div>
@@ -67,14 +87,7 @@ export default {
   },
   mounted () {
     this.classId = this.$route.query.classId
-    this.$axios.getClassDetail({id: this.classId})
-      .then(({ data }) => {
-        if (data.code === 200) {
-          this.classDetail = data.data
-        } else {
-          this.$message.error('获取信息失败')
-        }
-      })
+    this.getClass()
     this.$axios.checkChooseAuth({id: this.classId})
       .then(({ data }) => {
         if (data.code === 200) {
@@ -84,8 +97,40 @@ export default {
   }, 
   methods: {
     handleClick (e) {
-      console.log('click ', e)
       this.current = e.key
+    },
+    getClass () {
+      this.classId = this.$route.query.classId
+      this.$axios.getClassDetail({id: this.classId})
+        .then(({ data }) => {
+          if (data.code === 200) {
+            this.classDetail = data.data
+          } else {
+            this.$message.error('获取信息失败')
+          }
+        })
+    },
+    openClass (id) {
+      this.$axios.openClass({classId: this.classId})
+				.then(({data}) => {
+					if (data.code === 200) {
+						this.$message.success('操作成功')
+						this.getClass()
+					} else {
+						this.$message.error('操作失败')
+					}
+				})
+    },
+    offClass (id) {
+      this.$axios.offClass({classId: this.classId})
+				.then(({data}) => {
+					if (data.code === 200) {
+						this.$message.success('操作成功')
+						this.getClass()
+					} else {
+						this.$message.error('操作失败')
+					}
+				})
     }
   }
 }
@@ -95,7 +140,7 @@ export default {
   .detailContainer {
     .classTitle {
       width: 100vw;
-      min-width: 1200px;
+      min-width: 1400px;
       height: 10vh;
       min-height: 75px;
       position: relative;
@@ -134,6 +179,11 @@ export default {
         height: auto;
         min-height: 560px;
         float: left;
+      }
+      .optionButton {
+        position: absolute;
+        left: 20px;
+        bottom: 50px;
       }
       .content {
         background: white;

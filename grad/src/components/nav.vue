@@ -36,7 +36,7 @@
 					@mouseover="mouseOver"
 					@mouseleave="mouseLeave"
 				>
-					<div class="userPwd">
+					<div class="userPwd" @click="showPwdModal()">
 						<img src="../assets/change.png" style="width:20px; height:20px;">
 						<span>修改密码</span>
 					</div>
@@ -91,7 +91,32 @@
 					</aCol>
 				</aRow>			
 			</a-form>
+		
+		
 		</a-modal>
+		  <a-modal
+        title="修改密码"
+        v-model="pwdVisible"
+        @cancel="cancelPwdModal"
+        :footer="null"
+        class="pwdModal"
+      >
+        <div class="wrap">
+          <span>请输入新的密码:</span>
+          <a-input 
+            v-model="newPwd" 
+            type="password" 
+            style="display: inline-block; width: 300px; margin-left: 10px;" 
+          />
+          <a-button 
+            type="primary" 
+            @click="updatePwd()"
+            style="display: block;margin: 0 auto; margin-top: 40px;"
+          >
+            提交
+          </a-button>
+        </div>
+    </a-modal>
   </div>
 </template>
 
@@ -114,6 +139,9 @@ export default {
 			],
 			userConfirm: 'none',
 			visible: false,
+			pwdVisible: false, // 修改密码的窗口
+			newPwd: '',
+			userId: window.sessionStorage.getItem('userId') || '',
 			formLayout: 'horizontal',
       form: this.$form.createForm(this, { name: 'loginForm' })
 		}
@@ -208,10 +236,38 @@ export default {
 			})
 		},
 
+		// 注销
 		logOut () {
 			this.$store.dispatch('LogOut')
 			this.barList.pop()
-		}
+		},
+
+    // 展示修改密码窗口
+    showPwdModal () {
+      this.pwdVisible = true
+		},
+		
+		// 隐藏窗口
+		cancelPwdModal () {
+      this.newPwd = ''
+      this.pwdVisible = false
+    },
+
+		// 修改密码
+		updatePwd () {
+      if (this.userId) {
+        this.$axios.updatePassword({ userId: this.userId, password: this.newPwd })
+          .then(({data}) => {
+            if (data.code === 200) {
+              this.pwdVisible = false
+              this.$message.success('修改成功')
+              this.newPwd = ''
+            } else {
+              this.$message.success('修改失败')
+            }
+          })
+      }
+    }
 	},
 	computed: mapState({
 		id: 'userId',

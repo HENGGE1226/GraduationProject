@@ -103,7 +103,31 @@
 					<p class="itemId">课程ID: {{item.classId}}</p>
 					<p class="itemTime">开课老师: {{item.teacherName}}</p>
 					<p class="itemTime">开课时间: {{item.year}}{{item.season === 'spring' ? '春季学期' : '秋季学期'}}</p>
-					<aButton class="itemButton" @click="goDetail(item.id)">
+					<a-popconfirm
+						title="确定删除此课程吗?"
+						@confirm="deleteClass(item.id)"
+						okText="确认"
+						cancelText="取消"
+          >
+						<aButton class="deleteButton" v-if="userType === '2'">
+							删除课程
+						</aButton>
+      		</a-popconfirm>
+					<a-popconfirm
+						title="确定退出此课程吗?"
+						@confirm="quitClass(item.id)"
+						okText="确认"
+						cancelText="取消"
+          >
+						<aButton class="deleteButton" v-if="userType === '1'">
+							退课
+						</aButton>
+      		</a-popconfirm>
+					<aButton 
+						class="itemButton" 
+						@click="goDetail(item.id)"
+						:disabled="item.classStatus === 'off' && userType === '1'"
+					>
 						进入课程
 					</aButton>
 				</div>
@@ -124,7 +148,8 @@ export default {
       formLayout: 'horizontal',
 			form: this.$form.createForm(this, { name: 'coordinated' }),
 			classItem: [],
-			total: 0
+			total: 0,
+			userType: window.sessionStorage.getItem('userType')
     }
 	},
 	mounted () {
@@ -186,6 +211,28 @@ export default {
 		},
 		goDetail (id) {
 			this.$router.push({path: 'classDetail', query: { classId: id }})
+		},
+		deleteClass (id) {
+			this.$axios.deleteClass({classId: id})
+				.then(({data}) => {
+					if (data.code === 200) {
+						this.$message.success('删除课程成功')
+						this.getUserClass(1, 3)
+					} else {
+						this.$message.error('删除课程失败')
+					}
+				})
+		},
+		quitClass (id) {
+			this.$axios.quitClass({classId: id})
+				.then(({data}) => {
+					if (data.code === 200) {
+						this.$message.success('退课成功')
+						this.getUserClass(1, 3)
+					} else {
+						this.$message.error('退课失败')
+					}
+				})
 		}
 	},
 	computed: mapState({
@@ -263,6 +310,12 @@ export default {
 						position: absolute;
 						right: 30px;
 						bottom: 50px;
+					}
+					.deleteButton {
+						position: absolute;
+						right: 30px;
+						bottom: 100px;
+						color: red;
 					}
 				}
 			}
